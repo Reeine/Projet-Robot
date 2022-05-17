@@ -1,0 +1,83 @@
+#include <SPI.h>
+#include <MFRC522.h>
+ 
+#define SS_PIN 10
+#define RST_PIN 9
+MFRC522 mfrc522(SS_PIN, RST_PIN);   // Création de l'instance MFRC522
+ 
+void setup() 
+{
+  pinMode(7,1);
+  pinMode(6,1);
+  Serial.begin(9600);   // Initialisation de la communication série
+  SPI.begin();      // Initiatialistaion du SPI bus
+  mfrc522.PCD_Init();   // Initialiser le module MFRC522
+  Serial.println("Approche la carte...");
+  Serial.println();
+
+}
+void loop() 
+{
+  // recherche d'une nouvelle carte
+  if ( ! mfrc522.PICC_IsNewCardPresent()) 
+  {
+    return;
+  }
+  // Selectionner une de cartes
+  if ( ! mfrc522.PICC_ReadCardSerial()) 
+  {
+    return;
+  }
+  //afficher sur le moniteur 
+  Serial.print("UID tag :");
+  String content= "";
+  byte letter;
+  for (byte i = 0; i < mfrc522.uid.size; i++) 
+  {
+     Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+     Serial.print(mfrc522.uid.uidByte[i], HEX);
+     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+     content.concat(String(mfrc522.uid.uidByte[i], HEX));
+  }
+  Serial.println();
+  Serial.print("Message : ");
+  content.toUpperCase();
+  if (content.substring(1) == "C4 EB 05 29")// Le tag de la carte autorisé
+  {
+    Serial.println("Accès autorisé");
+    Serial.println();
+    //delay(3000);
+    digitalWrite(6,1);
+    delay(200);
+    digitalWrite(6,0);
+    delay(200);
+    digitalWrite(6,1);
+    delay(200);
+    digitalWrite(6,0);
+    delay(200);
+    digitalWrite(6,1);
+    delay(200);
+    digitalWrite(6,0);
+    delay(1000);
+  }
+  else 
+  {
+    Serial.println(" Accès refusé");
+    Serial.println();
+    //delay(3000);
+    digitalWrite(7,1);
+    delay(200);
+    digitalWrite(7,0);
+    delay(200);
+    digitalWrite(7,1);
+    delay(200);
+    digitalWrite(7,0);
+    delay(200);
+    digitalWrite(7,1);
+    delay(200);
+    digitalWrite(7,0);
+    delay(1000);
+  }
+ 
+ 
+} 
